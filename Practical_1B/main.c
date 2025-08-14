@@ -51,6 +51,17 @@
   checksum: should be uint64_t
   initial width and height maybe or you might opt for an array??
 */
+uint64_t checksum;
+
+uint32_t start_time;
+
+uint32_t end_time;
+
+uint32_t execution_time;
+
+int height = 256; //Change height to test
+
+int width = 256; //Change width to test
 
 /* USER CODE END PV */
 
