@@ -224,6 +224,46 @@ uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int 
 uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations){
     uint64_t mandelbrot_sum = 0;
     //TODO: Complete the function implementation
+ double x_0;
+    double y_0;
+    double yi;
+    double xi;
+    double iteration;
+    double temp;
+
+
+
+      for(int y = 0; y<=height-1; y++){
+
+    	  for(int x = 0; x<=width-1; x++){
+
+    		  x_0 = ((double)x)/width*3.5 - 2.5; //Typecasting to perform operations with like data types
+
+    		  y_0 = ((double)y)/height*2 - 1;
+    		  xi = 0;
+    		  yi = 0;
+    		  iteration = 0;
+
+    		  while ((iteration<max_iterations)&&((xi*xi)+(yi*yi)<=4)){
+
+    			  temp = xi*xi - yi*yi; //Applying formulas here, nothing fancy :)
+
+    			  yi = 2*xi*yi + y_0;
+
+    			  xi = temp + x_0;
+
+    			  iteration++;
+
+    		  }
+
+    		  mandelbrot_sum = mandelbrot_sum + iteration;
+
+    	  }
+
+
+      }
+
+
     
     return mandelbrot_sum;
 }
