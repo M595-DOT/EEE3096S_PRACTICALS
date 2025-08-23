@@ -46,7 +46,7 @@ main_loop:
     B     main_loop
 
 leds_on:
-    MOVS  R2, #0xAA           @ 
+    MOVS  R2, #0xAA           @ turn on Pattern 
     STR   R2, [R1, #0x14]
     B     main_loop
 
