@@ -35,18 +35,18 @@ ASM_Main:
 @ TODO: Add code, labels and logic for button checks and LED patterns
 
 main_loop:
-    LDR   R3, [R0, #0x10]    @ read GPIOA_IDR (buttons)
+    LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
     MOVS R4, #0x04
-    ANDS R3, R4           @ R4 = 0x0F mask (low 4 bits)
-    CMP R3, #0             @ R3 = R3 & 0x0F (keep PA0..PA3)
- 	BEQ leds_on             @ invert because pull-ups: pressed=0 -> 1
+    ANDS R3, R4           
+    CMP R3, #0             
+ 	BEQ leds_on
 
-    MOVS  R2, #0x00           @ Otherwise, turn off LEDs
+    MOVS  R2, #0x00           @ turn off LEDs
     STR   R2, [R1, #0x14]
     B     main_loop
 
 leds_on:
-    MOVS  R2, #0xAA           @ PA0 pressed → turn on all LEDs
+    MOVS  R2, #0xAA           @ 
     STR   R2, [R1, #0x14]
     B     main_loop
 
