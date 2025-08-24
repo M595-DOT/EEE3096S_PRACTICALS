@@ -35,25 +35,62 @@ ASM_Main:
 @ TODO: Add code, labels and logic for button checks and LED patterns
 
 main_loop:
+    @ SW0 pressed
+    LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
+    MOVS R4, #0x01
+    ANDS R3, R4
+    CMP R3, #0 @compare to zero as active low pin
+
+    @ SW1 pressed
+    LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
+    MOVS R4, #0x02
+    ANDS R3, R4
+    CMP R3, #0  @compare to zero as active low pin
+
+    @ SW2 pressed
     LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
     MOVS R4, #0x04
-    ANDS R3, R4           
-    CMP R3, #0             
- 	BEQ leds_on
+    ANDS R3, R4
+    CMP R3, #0  @compare to zero as active low pin
+ 	BEQ SW2_pressed
 
-    MOVS  R2, #0x00           @ turn off LEDs
-    STR   R2, [R1, #0x14]
+ 	@ SW3 pressed
+    LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
+    MOVS R4, #0x08
+    ANDS R3, R4
+    CMP R3, #0  @compare to zero as active low pin
+	BEQ SW3_pressed
+
+
+	@default
+	ADDS R2, R2, #1 @ Increment count
+	B write_leds
+
+SW2_pressed:
+    MOVS  R3, #0xAA
+    STR   R3, [R1, #0x14]
     B     main_loop
 
-leds_on:
-    MOVS  R2, #0xAA           @ turn on Pattern 
-    STR   R2, [R1, #0x14]
-    B     main_loop
-
+SW3_pressed:
+	MOV R3, R2
+	STR R3, [R1, #0x14]
+sw3_loop:
+	LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
+    MOVS R4, #0x08
+    ANDS R3, R4
+    CMP R3, #0  @compare to zero as active low pin
+	BEQ SW3_pressed
 
 write_leds:
 	STR R2, [R1, #0x14]
-	B main_loop
+   	LDR R5, =LONG_DELAY_CNT
+    LDR R5, [R5]
+
+   delay_loop:
+    SUBS R5, R5, #1
+    CMP R5, #0
+    BNE delay_loop
+    B main_loop
 
 @ LITERALS; DO NOT EDIT
 	.align
@@ -64,5 +101,5 @@ GPIOB_BASE:  		.word 0x48000400
 MODER_OUTPUT: 		.word 0x5555
 
 @ TODO: Add your own values for these delays
-LONG_DELAY_CNT: 	.word 0
-SHORT_DELAY_CNT: 	.word 0
+LONG_DELAY_CNT: 	.word 1400000
+SHORT_DELAY_CNT: 	.word 600000
