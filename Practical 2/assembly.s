@@ -36,33 +36,41 @@ ASM_Main:
 
 
 main_loop:
+
+	@ SW0 and SW1 pressed
+    LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
+    MOVS R4, #0x03 @Bitmask for SW0 and SW1
+    ANDS R3, R4		@Remove other bits and leave the bitsfor SW0 and SW1 HIGH
+    CMP R3, #0  @compare to zero as active low pin
+    BEQ SW0_SW1_pressed
+
 	@ SW0 pressed
     LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
-    MOVS R4, #0x01
-    ANDS R3, R4
+    MOVS R4, #0x01 @Bitmask for SW0
+    ANDS R3, R4		@Remove other bits and leave the bit for SW0 HIGH
     CMP R3, #0 @compare to zero as active low pin
     BEQ increment
 
     @ SW1 pressed
     LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
-    MOVS R4, #0x02
-    ANDS R3, R4
-    CMP R3, #0  @compare to zero as active low pin
+    MOVS R4, #0x02   		@Bitmask for SW1
+    ANDS R3, R4	     @Remove other bits and leave the bit for SW2 HIGH
+    CMP R3, #0       @compare to zero as active low pin
     BEQ SW1_pressed
 
     @ SW2 pressed
     LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
-    MOVS R4, #0x04
-    ANDS R3, R4
+    MOVS R4, #0x04 @Bitmask for SW2 to only focus on SW2
+    ANDS R3, R4 @Remove other bits and leave the bit for SW2 HIGH
     CMP R3, #0  @compare to zero as active low pin
- 	BEQ SW2_pressed
+ 	BEQ SW2_pressed @Go to label SW2_pressed if true
 
  	@ SW3 pressed
     LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
-    MOVS R4, #0x08
-    ANDS R3, R4
+    MOVS R4, #0x08 @Bitmask for SW3 to only focus on SW3
+    ANDS R3, R4		@Remove other bits and leave the bit for SW3 HIGH
     CMP R3, #0  @compare to zero as active low pin
-	BEQ SW3_pressed
+	BEQ SW3_pressed @Go to label SW3_pressed if true
 
 
 	@default
@@ -70,23 +78,30 @@ main_loop:
 	B write_leds
 
 increment:
-	ADDS R2, R2, #2 		@ Increment count by 2
+	ADDS R2, R2, #2 @ Increment count by 2
 	B write_leds
 
 SW2_pressed:
-    MOVS  R2, #0xAA
-    STR   R2, [R1, #0x14]
+    MOVS  R2, #0xAA @Set the value in register R2 0xAA
+    STR   R2, [R1, #0x14] @Store the actual value in R1 to R2
     B     main_loop
 
 SW3_pressed:
 	MOV R3, R2
 	STR R3, [R1, #0x14]
 sw3_loop:
-	LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
+	LDR   R3, [R0, #0x10] @ read GPIOA_IDR
     MOVS R4, #0x08
-    ANDS R3, R4
-    CMP R3, #0  @compare to zero as active low pin
+    ANDS R3, R4		@remove the bits we are not focussed on
+    CMP R3, #0 @compare to zero as active low pin
 	BEQ SW3_pressed
+
+SW0_SW1_pressed:
+    ADDS R2, R2, #2 @ increment by 2
+    STR  R2, [R1, #0x14]
+    LDR  R5, =SHORT_DELAY_CNT @ use short delay to make it "faster"
+    LDR  R5, [R5]
+    B    delay_loop
 
 write_leds:
 	STR R2, [R1, #0x14]
@@ -100,10 +115,12 @@ write_leds:
    	LDR R5, =SHORT_DELAY_CNT
     LDR R5, [R5]
 
+
+	@Decrement value in R5 until it reaches zero, then branch to main loop when done
    delay_loop:
     SUBS R5, R5, #1
     CMP R5, #0
-    BNE delay_loop
+    BNE delay_loop @
     B main_loop
 
 	STR R2, [R1, #0x14]
