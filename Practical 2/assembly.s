@@ -34,18 +34,21 @@ ASM_Main:
 
 @ TODO: Add code, labels and logic for button checks and LED patterns
 
+
 main_loop:
-    @ SW0 pressed
+	@ SW0 pressed
     LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
     MOVS R4, #0x01
     ANDS R3, R4
     CMP R3, #0 @compare to zero as active low pin
+    BEQ increment
 
     @ SW1 pressed
     LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
     MOVS R4, #0x02
     ANDS R3, R4
     CMP R3, #0  @compare to zero as active low pin
+    BEQ SW1_pressed
 
     @ SW2 pressed
     LDR   R3, [R0, #0x10]    @ read GPIOA_IDR
@@ -66,9 +69,13 @@ main_loop:
 	ADDS R2, R2, #1 @ Increment count
 	B write_leds
 
+increment:
+	ADDS R2, R2, #2 		@ Increment count by 2
+	B write_leds
+
 SW2_pressed:
-    MOVS  R3, #0xAA
-    STR   R3, [R1, #0x14]
+    MOVS  R2, #0xAA
+    STR   R2, [R1, #0x14]
     B     main_loop
 
 SW3_pressed:
@@ -85,12 +92,22 @@ write_leds:
 	STR R2, [R1, #0x14]
    	LDR R5, =LONG_DELAY_CNT
     LDR R5, [R5]
+    B delay_loop
+
+    SW1_pressed:
+    ADDS R2, R2, #1
+    STR R2, [R1, #0x14]
+   	LDR R5, =SHORT_DELAY_CNT
+    LDR R5, [R5]
 
    delay_loop:
     SUBS R5, R5, #1
     CMP R5, #0
     BNE delay_loop
     B main_loop
+
+	STR R2, [R1, #0x14]
+	B main_loop
 
 @ LITERALS; DO NOT EDIT
 	.align
