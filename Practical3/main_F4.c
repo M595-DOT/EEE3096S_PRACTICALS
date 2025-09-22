@@ -36,7 +36,7 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define MAX_ITER 100
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -52,6 +52,17 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
 //TODO: Define any function prototypes you might need such as the calculate Mandelbrot function among others
+uint64_t checksum;
+uint32_t start_time;
+uint32_t end_time;
+uint32_t execution_time;
+uint32_t cycles;
+uint32_t throughput;
+double height = 128; //Change height to test
+double width = 128; //Change width to test
+
+uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int max_iterations);
+uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations);
 
 /* USER CODE END PFP */
 
@@ -101,17 +112,22 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 	  //TODO: Visual indicator: Turn on LED0 to signal processing start
+  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+  
 
 
 	  //TODO: Benchmark and Profile Performance
-
+ 		start_time = HAL_GetTick();
+	  	checksum = calculate_mandelbrot_double(width, height, MAX_ITER);
+ 		end_time = HAL_GetTick();
+	  	execution_time = end_time - start_time;
 
 	  //TODO: Visual indicator: Turn on LED1 to signal processing start
-
-
+	  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
 	  //TODO: Keep the LEDs ON for 2s
-
+		HAL_Delay(2000);
 	  //TODO: Turn OFF LEDs
+	  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
   }
   /* USER CODE END 3 */
 }
@@ -199,7 +215,65 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 //TODO: Function signatures you defined previously , implement them here
+uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int max_iterations){
+  uint64_t mandelbrot_sum = 0;
+    //TODO: Complete the function implementation
+    	   int64_t S = 1000000;
+    	   int64_t c1 = 3500000;
+    	   int64_t c2 = 2500000;
+    	   int64_t c3 = 2000000;
+    	   int64_t c4 = 1000000;
+    	   int64_t c5 = 4000000;
+    	  for(int64_t y = 0; y< height-1;y++){
+    		for(int64_t x = 0; x< width-1;x++){
+    			int64_t y0 = ((((y*S) / height) * c3)/S) - c4;
+    			int64_t x0 = ((((x*S) / width) * c1)/S) - c2;
+    			int64_t yi = 0;
+    			int64_t xi = 0;
+    			int64_t iteration = 0;
+    			while(iteration<max_iterations && ((xi*xi)/S + (yi*yi)/S)<=c5){
+    				int64_t temp = ((xi*xi)/S - (yi*yi)/S);
+    				yi = ((2*xi*yi)/S) + y0;
+    				xi = temp + x0;
+    				iteration= iteration + 1;
+    			}
+    			mandelbrot_sum = mandelbrot_sum + iteration;
+    		}
+    	  }
 
+    	  return mandelbrot_sum;
+}
+
+
+//TODO: Mandelbrot using variable type double
+uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations){
+    uint64_t mandelbrot_sum = 0;
+    //TODO: Complete the function implementation
+    double x_0;
+    double y_0;
+    double yi;
+    double xi;
+    double iteration;
+    double temp;
+      for(int y = 0; y<=height-1; y++){
+    	  for(int x = 0; x<=width-1; x++){
+    		  x_0 = ((double)x)/width*3.5 - 2.5; //Typecasting to perform operations with like data types
+    		  y_0 = ((double)y)/height*2 - 1;
+    		  xi = 0;
+    		  yi = 0;
+    		  iteration = 0;
+    		  while ((iteration<max_iterations)&&((xi*xi)+(yi*yi)<=4)){
+    			  temp = xi*xi - yi*yi; //Applying formulas here, nothing fancy :)
+    			  yi = 2*xi*yi + y_0;
+    			  xi = temp + x_0;
+    			  iteration++;
+    		  }
+
+    		  mandelbrot_sum = mandelbrot_sum + iteration;
+    	  }
+      }
+      return mandelbrot_sum;
+}
 /* USER CODE END 4 */
 
 /**
@@ -232,3 +306,4 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
