@@ -58,8 +58,8 @@ uint32_t end_time;
 uint32_t execution_time;
 uint32_t cycles;
 uint32_t throughput;
-double height = 128; //Change height to test
-double width = 128; //Change width to test
+int width[11]  = {320,416,512,640,704,832,960,1024,1152,1216,1920};//task4
+int height[11] = {320,416,512,640,704,832,960,1024,1080,1080,1080};//task4
 
 uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int max_iterations);
 uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations);
@@ -321,5 +321,6 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
