@@ -117,6 +117,8 @@ int main(void)
   	  checksum = calculate_mandelbrot_fixed_point_arithmetic(width, height, MAX_ITER);
   	  end_time = HAL_GetTick();
   	  execution_time = end_time - start_time;
+	  ticks = 48000000*(execution_time/1000);
+  	  throughput = (width*height*48000000)/ticks;
 
 
 	  //TODO: Visual indicator: Turn on LED1 to signal processing start
@@ -300,5 +302,6 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
