@@ -18,7 +18,18 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include <stdint.h>
+/* Private typedef -----------------------------------------------------------*/
+#define MAX_ITER 100
+#define NUM_TESTS 5   // Number of scalability steps
+// Results array: each row stores {width, height, checksum, exec_time}
+typedef struct {
+    int width;
+    int height;
+    uint64_t checksum;
+    uint32_t exec_time;
+} Result;
+Result results[NUM_TESTS];
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -65,7 +76,36 @@ uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int max_iterations){
+	uint64_t mandelbrot_sum = 0;
+	    const int64_t S = 1000000;
+	    const int64_t THREE_POINT_FIVE = 3500000;
+	    const int64_t TWO_POINT_FIVE   = 2500000;
+	    const int64_t TWO             = 2000000;
+	    const int64_t ONE             = 1000000;
+	    const int64_t FOUR            = 4000000;
 
+	    for (int64_t y = 0; y < height - 1; y++)
+	    {
+	        for (int64_t x = 0; x < width - 1; x++)
+	        {
+	            int64_t y0 = ((((y*S) / height) * TWO) / S) - ONE;
+	            int64_t x0 = ((((x*S) / width) * THREE_POINT_FIVE) / S) - TWO_POINT_FIVE;
+	            int64_t xi = 0, yi = 0, iteration = 0;
+
+	            while (iteration < max_iterations &&
+	                   ((xi*xi)/S + (yi*yi)/S) <= FOUR)
+	            {
+	                int64_t temp = ((xi*xi)/S - (yi*yi)/S);
+	                yi = ((2*xi*yi)/S) + y0;
+	                xi = temp + x0;
+	                iteration++;
+	            }
+	            mandelbrot_sum += iteration;
+	        }
+	    }
+	    return mandelbrot_sum;
+}
 /* USER CODE END 0 */
 
 /**
@@ -98,7 +138,21 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
+int widths[NUM_TESTS]  = {128, 160, 192, 224, 256};
+  int heights[NUM_TESTS] = {128, 160, 192, 224, 256};
 
+  for (int t = 0; t < NUM_TESTS; t++) {
+      int w = widths[t];
+      int h = heights[t];
+      start_time = HAL_GetTick();
+      checksum = calculate_mandelbrot_fixed_point_arithmetic(w, h, MAX_ITER);
+      end_time = HAL_GetTick();
+      execution_time = end_time - start_time;
+      results[t].width = w;
+      results[t].height = h;
+      results[t].checksum = checksum;
+      results[t].exec_time = execution_time;
+  }
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -287,6 +341,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
 
