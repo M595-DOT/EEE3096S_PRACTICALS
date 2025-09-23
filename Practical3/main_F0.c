@@ -50,8 +50,8 @@ uint32_t end_time;
 uint32_t execution_time;
 uint32_t ticks;
 uint32_t throughput;
-double height = 128; //Change height to test
-double width = 128; //Change width to test
+double width[11]  = {320,416,512,640,704,832,960,1024,1152,1216,1920};//task4
+double height[11] = {320,416,512,640,704,832,960,1024,1080,1080,1080};//task4
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -214,61 +214,46 @@ static void MX_GPIO_Init(void)
 uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int max_iterations){
   uint64_t mandelbrot_sum = 0;
     //TODO: Complete the function implementation
-    	   int64_t S = 1000000;
-    	   int64_t c1 = 3500000;
-    	   int64_t c2 = 2500000;
-    	   int64_t c3 = 2000000;
-    	   int64_t c4 = 1000000;
-    	   int64_t c5 = 4000000;
-    	  for(int64_t y = 0; y< height-1;y++){
-    		for(int64_t x = 0; x< width-1;x++){
-    			int64_t y0 = ((((y*S) / height) * c3)/S) - c4;
-    			int64_t x0 = ((((x*S) / width) * c1)/S) - c2;
-    			int64_t yi = 0;
-    			int64_t xi = 0;
-    			int64_t iteration = 0;
-    			while(iteration<max_iterations && ((xi*xi)/S + (yi*yi)/S)<=c5){
-    				int64_t temp = ((xi*xi)/S - (yi*yi)/S);
-    				yi = ((2*xi*yi)/S) + y0;
-    				xi = temp + x0;
-    				iteration= iteration + 1;
-    			}
-    			mandelbrot_sum = mandelbrot_sum + iteration;
-    		}
-    	  }
+    for(int y = 0 ; y < height; y++){
+    	for(int x = 0 ; x < width ; x++ ){
+    		int64_t x0 = (((int64_t)((x * 3500000LL) / width)) - 2500000LL); 
+    		int64_t y0 = (((int64_t)((y * 2000000LL) / height)) - 1000000LL);
+    		int64_t xi = 0; int64_t yi = 0;
+    		int iteration = 0;
+    		while((iteration <  max_iterations) && ((((xi * xi)/ SCALE) + ((yi * yi)/ SCALE)) <= 4000000LL)){
+    			int temp  = ((xi * xi)/ SCALE) - ((yi * yi)/ SCALE);//This is the imaginary representation of Z^2
+    			yi = ((2LL*(xi * yi)/ SCALE) + y0);//this is the real z^2
+    			xi = temp + x0;//this is the real representation of z^2 +c
 
-    	  return mandelbrot_sum;
+    			iteration++;//keeping track of the number of times we have done iterations
+    		}
+    		mandelbrot_sum += iteration;
+    	}
+    }
+    return mandelbrot_sum;
+
 }
 
-
-//TODO: Mandelbrot using variable type double
+//TODO: Mandelbroat using variable type double(double precision)
 uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations){
     uint64_t mandelbrot_sum = 0;
     //TODO: Complete the function implementation
-    double x_0;
-    double y_0;
-    double yi;
-    double xi;
-    double iteration;
-    double temp;
-      for(int y = 0; y<=height-1; y++){
-    	  for(int x = 0; x<=width-1; x++){
-    		  x_0 = ((double)x)/width*3.5 - 2.5; //Typecasting to perform operations with like data types
-    		  y_0 = ((double)y)/height*2 - 1;
-    		  xi = 0;
-    		  yi = 0;
-    		  iteration = 0;
-    		  while ((iteration<max_iterations)&&((xi*xi)+(yi*yi)<=4)){
-    			  temp = xi*xi - yi*yi; //Applying formulas here, nothing fancy :)
-    			  yi = 2*xi*yi + y_0;
-    			  xi = temp + x_0;
-    			  iteration++;
-    		  }
-
-    		  mandelbrot_sum = mandelbrot_sum + iteration;
-    	  }
-      }
-      return mandelbrot_sum;
+    for(int y = 0 ; y < height ; y++){
+    	for(int x = 0 ; x < width ; x++ ){
+    		double x0  = ((((double)(x / width)) * 3.5 ) - 2.5);
+    		double y0  = ((((double)(y / width)) * 2.0 ) - 1.0);
+    		double xi = 0.0; double yi = 0.0;
+    		double iteration =  0;//keeping track of the number of times we have done iterations
+    		while((iteration < max_iterations) && (((xi * xi) + (yi * yi)) <= 4.0)){
+    			double temp = ((xi * xi) - (yi * yi));//This is the imaginary representation of Z^2
+    			yi  = (2.0 * (xi * yi) + y0);//this is the real z^2
+    			xi = (temp + x0);//this is the real representation of z^2 +c
+    			iteration++;
+    		}
+    		mandelbrot_sum += iteration;
+    	}
+    }
+    return mandelbrot_sum;
 }
 /* USER CODE END 4 */
 
@@ -302,6 +287,7 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
 
 
