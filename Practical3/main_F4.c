@@ -64,6 +64,16 @@ double width = 128; //Change width to test
 uint64_t calculate_mandelbrot_fixed_point_arithmetic(int width, int height, int max_iterations);
 uint64_t calculate_mandelbrot_double(int width, int height, int max_iterations);
 
+static inline void dwt_enable_cycle_counter(void) {
+    CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk; // enable trace
+    DWT->CYCCNT = 0;                                // reset
+    DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;            // start counter
+}
+
+// Read current cycle count
+static inline uint32_t dwt_get_cycles(void) {
+    return DWT->CYCCNT;
+}
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -118,9 +128,14 @@ int main(void)
 
 	  //TODO: Benchmark and Profile Performance
  		start_time = HAL_GetTick();
+	  	dwt_enable_cycle_counter();
+ 		uint32_t start_cycles = dwt_get_cycles();
 	  	checksum = calculate_mandelbrot_double(width, height, MAX_ITER);
  		end_time = HAL_GetTick();
+	  	uint32_t end_cycles = dwt_get_cycles();
+ 		cycles =  end_cycles - start_cycles;
 	  	execution_time = end_time - start_time;
+	  	throughput = (width*height*120000000)/cycles;
 
 	  //TODO: Visual indicator: Turn on LED1 to signal processing start
 	  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET);
@@ -306,4 +321,5 @@ void assert_failed(uint8_t *file, uint32_t line)
   /* USER CODE END 6 */
 }
 #endif /* USE_FULL_ASSERT */
+
 
